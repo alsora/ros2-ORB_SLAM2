@@ -99,20 +99,6 @@ RUN rosdep install --from-paths src --ignore-src --rosdistro bouncy -y --skip-ke
 RUN colcon build --symlink-install
 
 
-#### SET ENVIRONMENT
-
-
-WORKDIR $HOME
-
-RUN echo ' \n\
-echo "Sourcing ROS2 packages..." \n\
-source $HOME/ros2_sdk/install/setup.sh' >> $HOME/.bashrc
-
-RUN echo ' \n\
-alias python="python3"' >> $HOME/.bashrc
-
-
-
 ##### OPENCV3
 
 
@@ -123,8 +109,7 @@ RUN mkdir $HOME/opencv/build
 WORKDIR $HOME/opencv/build
 
 RUN chmod +x $HOME/scripts/build_opencv.sh
-RUN /bin/bash -c 'source $HOME/.bashrc; \
-  $HOME/scripts/build_opencv.sh'
+RUN bash $HOME/scripts/build_opencv.sh
 
 
 ######## ORBSLAM2 SETUP
@@ -149,10 +134,6 @@ WORKDIR $HOME/orbslam/Pangolin/build
 RUN cmake ..
 RUN cmake --build .
 
-# add pangolin shared library to path
-RUN echo ' \n\
-export LD_LIBRARY_PATH=~/orbslam/Pangolin/build/src/:$LD_LIBRARY_PATH' >> $HOME/.bashrc
-
 WORKDIR $HOME/orbslam
 
 # get orbslam sources
@@ -167,7 +148,7 @@ WORKDIR $HOME/orbslam/ORB_SLAM2
 RUN rm CMakeLists.txt
 RUN cp $HOME/scripts/CMakeLists.txt .
 RUN chmod +x $HOME/scripts/build.sh
-RUN /bin/bash -c 'source $HOME/.bashrc; \
+RUN /bin/bash -c 'export LD_LIBRARY_PATH=~/orbslam/Pangolin/build/src/:$LD_LIBRARY_PATH; \
   bash $HOME/scripts/build.sh'
 
 
@@ -179,7 +160,7 @@ RUN mkdir -p $HOME/ws/src
 WORKDIR $HOME/ws
 
 # get source code
-RUN git clone https://github.com/alsora/ros2-ORB_SLAM2 src/ros2-ORB_SLAM2 $HOME/ros2-ORB_SLAM2
+RUN git clone https://github.com/alsora/ros2-ORB_SLAM2 $HOME/ros2-ORB_SLAM2
 RUN ln -s $HOME/ros2-ORB_SLAM2/src/orbslam src/
 RUN git clone -b ros2 https://github.com/ros-perception/vision_opencv.git src/vision_opencv
 
@@ -190,4 +171,21 @@ RUN pip install numpy
 # build the workspace
 RUN /bin/bash -c 'source $HOME/ros2_sdk/install/setup.sh; \
   colcon build'
+
+
+#### SET ENVIRONMENT
+
+
+WORKDIR $HOME
+
+RUN echo ' \n\
+echo "Sourcing ROS2 packages..." \n\
+source $HOME/ros2_sdk/install/setup.sh \n\
+source $HOME/ws/install/local_setup.sh' >> $HOME/.bashrc
+
+
+# add orbslam shared libraries to path
+RUN echo ' \n\
+export LD_LIBRARY_PATH=~/orbslam/Pangolin/build/src/:~/orbslam/ORB_SLAM2/Thirdparty/DBoW2/lib:~/orbslam/ORB_SLAM2/Thirdparty/g2o/lib:$LD_LIBRARY_PATH' >> $HOME/.bashrc
+
 

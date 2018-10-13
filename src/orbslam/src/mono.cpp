@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 
     if(argc != 3)
     {
-        cerr << endl << "Usage: rosrun ORB_SLAM2 Mono path_to_vocabulary path_to_settings" << endl;        
+        cerr << endl << "Usage: ros2 run orbslam mono path_to_vocabulary path_to_settings" << endl;        
         rclcpp::shutdown();
         return 1;
     }
@@ -50,10 +50,6 @@ int main(int argc, char **argv)
 
     ImageGrabber igb(&SLAM);
 
-    rmw_qos_profile_t custom_qos_profile = rmw_qos_profile_default;
-    custom_qos_profile.depth = rmw_qos_profile_default.depth;
-    custom_qos_profile.reliability = rmw_qos_profile_default.reliability;
-    custom_qos_profile.history = rmw_qos_profile_default.history;
     rclcpp::Subscription<ImageMsg>::SharedPtr subscriber = g_node->create_subscription<ImageMsg>("camera", std::bind(&ImageGrabber::GrabImage, igb, _1));
     
  
