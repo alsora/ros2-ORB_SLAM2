@@ -171,6 +171,7 @@ RUN git clone https://github.com/ros2/message_filters src/message_filters
 
 # build the workspace
 RUN /bin/bash -c 'source $HOME/ros2_sdk/install/setup.sh; \
+  export LD_LIBRARY_PATH=~/orbslam/Pangolin/build/src/:~/orbslam/ORB_SLAM2/Thirdparty/DBoW2/lib:~/orbslam/ORB_SLAM2/Thirdparty/g2o/lib:$LD_LIBRARY_PATH; \
   colcon build'
 
 
