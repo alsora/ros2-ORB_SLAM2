@@ -28,8 +28,6 @@ public:
 
     void GrabImage(const ImageMsg::SharedPtr msg);
 
-    cv::Mat imageMsgToCVMat(ImageMsg::SharedPtr ros_image) const;
-
     ORB_SLAM2::System* mpSLAM;
 };
 
@@ -45,8 +43,10 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    bool visualization = true;
+
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::MONOCULAR,true);
+    ORB_SLAM2::System SLAM(argv[1], argv[2], ORB_SLAM2::System::MONOCULAR, visualization);
 
     ImageGrabber igb(&SLAM);
 

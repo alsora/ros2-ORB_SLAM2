@@ -159,14 +159,16 @@ RUN /bin/bash -c 'export LD_LIBRARY_PATH=~/orbslam/Pangolin/build/src/:$LD_LIBRA
 RUN mkdir -p $HOME/ws/src
 WORKDIR $HOME/ws
 
+# get some dependencies
+RUN apt-get install -y libcanberra-gtk-module libboost-all-dev
+RUN pip install numpy
+
 # get source code
 RUN git clone https://github.com/alsora/ros2-ORB_SLAM2 $HOME/ros2-ORB_SLAM2
 RUN ln -s $HOME/ros2-ORB_SLAM2/src/orbslam src/
 RUN git clone -b ros2 https://github.com/ros-perception/vision_opencv.git src/vision_opencv
+RUN git clone https://github.com/ros2/message_filters src/message_filters
 
-# get some dependencies
-RUN apt-get install -y libcanberra-gtk-module libboost-all-dev
-RUN pip install numpy
 
 # build the workspace
 RUN /bin/bash -c 'source $HOME/ros2_sdk/install/setup.sh; \

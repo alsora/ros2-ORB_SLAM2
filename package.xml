@@ -3,7 +3,7 @@
 <package format="2">
   <name>orbslam</name>
   <version>0.0.1</version>
-  <description>Examples of minimal topic subscriber</description>
+  <description>ROS2 wrapper for the ORB_SLAM2 library</description>
   <maintainer email="alberto.soragna@gmail.com">Alberto Soragna</maintainer>
   <license>MIT</license>
   <author>Alberto Soragna</author>
@@ -13,10 +13,12 @@
   <build_depend>rclcpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
+  <build_depend>message_filters</build_depend>
 
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>message_filters</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

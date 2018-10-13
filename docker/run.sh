@@ -10,7 +10,6 @@ docker run -it --rm \
  -e DISPLAY=$DISPLAY \
  -v $XSOCK:$XSOCK \
  -v $HOME/.Xauthority:/root/.Xauthority \
- -v $HOME/source/alsora/ros2-ORB_SLAM2:/root/repo \
  --privileged \
  --net=host \
  ros2_orbslam2 "$@"
