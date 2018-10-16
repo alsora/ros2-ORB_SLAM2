@@ -24,19 +24,15 @@ using ImageMsg = sensor_msgs::msg::Image;
 
 rclcpp::Node::SharedPtr g_node = nullptr;
 
-ORB_SLAM2::System* g_pSLAM = nullptr;
-
-void GrabRGBD(const ImageMsg::SharedPtr msgRGB, const ImageMsg::SharedPtr msgD);
-
 
 class ImageGrabber
 {
 public:
-    ImageGrabber(ORB_SLAM2::System* pSLAM)
-    {
-        g_pSLAM = pSLAM;
-    };
+    ImageGrabber(ORB_SLAM2::System* pSLAM):mpSLAM(pSLAM){}
 
+    void GrabRGBD(const ImageMsg::SharedPtr msgRGB, const ImageMsg::SharedPtr msgD);
+
+    ORB_SLAM2::System* mpSLAM;
 };
 
 int main(int argc, char **argv)
@@ -67,9 +63,7 @@ int main(int argc, char **argv)
     message_filters::Synchronizer<approximate_sync_policy>syncApproximate(approximate_sync_policy(10), rgb_sub, depth_sub);
 
     // register the synchronization callback
-    //auto binded = std::bind(&ImageGrabber::GrabRGBD, &igb, _1, _2);
-    //syncApproximate.registerCallback(binded);
-    syncApproximate.registerCallback(GrabRGBD);
+    syncApproximate.registerCallback(&ImageGrabber::GrabRGBD, &igb);
 
     rclcpp::spin(g_node);
 
@@ -86,7 +80,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void GrabRGBD(const ImageMsg::SharedPtr msgRGB, const ImageMsg::SharedPtr msgD)
+void ImageGrabber::GrabRGBD(const ImageMsg::SharedPtr msgRGB, const ImageMsg::SharedPtr msgD)
 {
     
     // Copy the ros rgb image message to cv::Mat.
@@ -114,7 +108,7 @@ void GrabRGBD(const ImageMsg::SharedPtr msgRGB, const ImageMsg::SharedPtr msgD)
     }
     
 
-    g_pSLAM->TrackRGBD(cv_ptrRGB->image, cv_ptrD->image, msgRGB->header.stamp.sec);
+    mpSLAM->TrackRGBD(cv_ptrRGB->image, cv_ptrD->image, msgRGB->header.stamp.sec);
     
 }
 
