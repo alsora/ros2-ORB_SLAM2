@@ -50,8 +50,7 @@ int main(int argc, char **argv)
     bool visualization = true;
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(argv[1], argv[2], ORB_SLAM2::System::RGBD, visualization);
-
+    ORB_SLAM2::System SLAM(argv[1], argv[2], ORB_SLAM2::System::RGBD);
     ImageGrabber igb(&SLAM);
 
     // create subscribers to the topics of interest
@@ -111,5 +110,4 @@ void ImageGrabber::GrabRGBD(const ImageMsg::SharedPtr msgRGB, const ImageMsg::Sh
     mpSLAM->TrackRGBD(cv_ptrRGB->image, cv_ptrD->image, msgRGB->header.stamp.sec);
     
 }
-
 
