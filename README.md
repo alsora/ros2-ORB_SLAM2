@@ -19,18 +19,22 @@ The `message_filters` package is not required if you want to use only the Monocu
 This repository contains a Dockerfile providing an Ubuntu environment with all the dependences already installed.
 In order to use it
 
-    $ cd docker
+    $ cd docker_
     $ bash build.sh
     $ bash run.sh
+
+**Note** The `CMakeLists.txt` file contains hardcoded the path to the ORB_SLAM2 source directory. This is used to retrieve header files and shared libraries since these are not installed by ORB_SLAM2.
+
+If you are not using the Dockerfile, change the following line with the actual ORB_SLAM2 path.
+
+    set(ORB_SLAM2_DIR /root/ORB_SLAM2)
+
 
 ### Usage
 
 Run the monocular SLAM node
 
-    $ ros2 run orbslam mono ~/orbslam/ORB_SLAM2/Vocabulary/ORBvoc.txt.tar.gz ~/orbslam/ORB_SLAM2/Examples/Monocular/TUM1.yaml
-
-These paths are valid in the Docker environment, otherwise use your own paths.
-The `ORB_SLAM2` library contains the aforementioned vocabulary file and several configuration files.
+    $ ros2 run orbslam mono PATH_TO_VOCABULARY PATH_TO_YAML_CONFIG_FILE
 
 This node subscribes to the ROS2 topic `camera` and waits for Image messages.
 
@@ -39,4 +43,7 @@ For example you can stream frames from your laptop webcam using:
     $ ros2 run image_tools cam2image -t camera
 
 
+Similarly you can run the `rgbd` node by using 
+
+    $ ros2 run orbslam rgbd PATH_TO_VOCABULARY PATH_TO_YAML_CONFIG_FILE
 

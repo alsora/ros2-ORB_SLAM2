@@ -16,49 +16,40 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(visualization_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(message_filters REQUIRED)
+find_package(Pangolin REQUIRED)
 
-find_package(Boost COMPONENTS system) 
-find_package(OpenCV 3 REQUIRED)
-find_package(Eigen REQUIRED)
-find_package(ORB_SLAM2 REQUIRED)
+set(ORB_SLAM2_DIR /root/ORB_SLAM2)
 
+include_directories(${ORB_SLAM2_DIR}/include)
+include_directories(${ORB_SLAM2_DIR})
+include_directories(${Pangolin_INCLUDE_DIRS})
 
-include_directories(
-  ${ORB_SLAM2_INCLUDE_DIRS}
-  ${message_filters_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${EIGEN_INCLUDE_DIR}
-)
+link_directories(${ORB_SLAM2_DIR}/lib/)
 
 
 add_executable(mono 
-    src/monocular/mono.cpp
-    src/monocular/monocular-slam-node.cpp
-    )
-
-target_link_libraries(mono
-  g2o
-  DBoW2
-  ${ORB_SLAM2_LIBRARIES}
-  ${Boost_LIBRARIES}
+  src/monocular/mono.cpp
+  src/monocular/monocular-slam-node.cpp
 )
 
-ament_target_dependencies(mono rclcpp sensor_msgs visualization_msgs cv_bridge ORB_SLAM2 Boost)
+target_link_libraries(mono
+  ORB_SLAM2
+)
+
+ament_target_dependencies(mono rclcpp sensor_msgs cv_bridge ORB_SLAM2 Pangolin)
 
 
 add_executable(rgbd 
-    src/rgbd/rgbd.cpp
-    )
-
-target_link_libraries(rgbd
-  ${ORB_SLAM2_LIBRARIES}
-  ${Boost_LIBRARIES}
+  src/rgbd/rgbd.cpp
 )
 
-ament_target_dependencies(rgbd rclcpp sensor_msgs visualization_msgs cv_bridge message_filters ORB_SLAM2 Boost)
+target_link_libraries(rgbd
+  ORB_SLAM2
+)
+
+ament_target_dependencies(rgbd rclcpp sensor_msgs cv_bridge message_filters ORB_SLAM2 Pangolin)
 
 
 install(TARGETS mono rgbd
