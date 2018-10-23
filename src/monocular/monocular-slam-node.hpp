@@ -1,3 +1,6 @@
+#ifndef MONOCULAR_SLAM_NODE_HPP
+#define MONOCULAR_SLAM_NODE_HPP
+
 
 #include<iostream>
 #include<algorithm>
@@ -32,7 +35,15 @@ private:
 
     void GrabImage(const sensor_msgs::msg::Image::SharedPtr msg);
 
+    void PublishFrame();
+
+
+    cv::Mat DrawFrame();
+
+    void DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText);
+
     void UpdateSLAMState();
+
 
     ORB_SLAM2::System* m_SLAM;
 
@@ -44,13 +55,13 @@ private:
     int N;
     vector<cv::KeyPoint> mvCurrentKeys;
     vector<bool> mvbMap, mvbVO;
-    bool mbOnlyTracking;
     int mnTracked, mnTrackedVO;
     vector<cv::KeyPoint> mvIniKeys;
     vector<int> mvIniMatches;
     
     
     int mState;
+    bool mbOnlyTracking;
     bool mbUpdated;
 
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr m_image_subscriber;
@@ -58,3 +69,7 @@ private:
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr m_map_publisher;
 
 };
+
+
+
+#endif

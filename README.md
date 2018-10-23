@@ -42,4 +42,9 @@ For example you can stream frames from your laptop webcam using:
     $ ros2 run image_tools cam2image -t camera
 
 
+Similarly you can run the `rgbd` node by using 
+
+    $ ros2 run orbslam rgbd PATH_TO_VOCABULARY PATH_TO_YAML_CONFIG_FILE
+
+
 
