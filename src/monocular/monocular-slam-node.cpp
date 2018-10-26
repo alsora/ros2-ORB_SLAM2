@@ -6,6 +6,7 @@
 
 using ImageMsg = sensor_msgs::msg::Image;
 using MarkerMsg = visualization_msgs::msg::Marker;
+using PointMsg = geometry_msgs::msg::Point;
 
 using namespace std;
 
@@ -20,10 +21,14 @@ MonocularSlamNode::MonocularSlamNode(ORB_SLAM2::System* pSLAM, const string &str
 
     m_annotated_image_publisher = this->create_publisher<ImageMsg>("annotated_frame");
 
+    m_map_publisher = this->create_publisher<MarkerMsg>("ORB_SLAM_map");
+
     mState = ORB_SLAM2::Tracking::SYSTEM_NOT_READY;
     
     mbUpdated = true;
     mbOnlyTracking = false;
+
+    InitializeMarkersPublisher(strSettingsFile);
 
 }
 
@@ -53,11 +58,116 @@ void MonocularSlamNode::GrabImage(const ImageMsg::SharedPtr msg)
         return;
     }
     
-    cv::Mat Tcw = m_SLAM->TrackMonocular(m_cvImPtr->image, msg->header.stamp.sec);
+    Tcw = m_SLAM->TrackMonocular(m_cvImPtr->image, msg->header.stamp.sec);
 
     UpdateSLAMState();
+    UpdateMapState();
 
     PublishFrame();
+    PublishCurrentCamera();
+    PublishMapPoints();
+    PublishKeyFrames();
+
+}
+
+
+void MonocularSlamNode::InitializeMarkersPublisher( const string &strSettingPath)
+{
+
+    cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
+
+    mKeyFrameSize = fSettings["Viewer.KeyFrameSize"];
+    mKeyFrameLineWidth = fSettings["Viewer.KeyFrameLineWidth"];
+    mGraphLineWidth = fSettings["Viewer.GraphLineWidth"];
+    mPointSize = fSettings["Viewer.PointSize"];
+    mCameraSize = fSettings["Viewer.CameraSize"];
+    mCameraLineWidth = fSettings["Viewer.CameraLineWidth"];
+
+
+    const char* MAP_FRAME_ID = "map";
+    const char* POINTS_NAMESPACE = "MapPoints";
+    const char* KEYFRAMES_NAMESPACE = "KeyFrames";
+    const char* GRAPH_NAMESPACE = "Graph";
+    const char* CAMERA_NAMESPACE = "Camera";
+    
+    //Configure MapPoints
+    mPoints.header.frame_id = MAP_FRAME_ID;
+    mPoints.ns = POINTS_NAMESPACE;
+    mPoints.id=0;
+    mPoints.type = MarkerMsg::POINTS;
+    mPoints.scale.x=mPointSize;
+    mPoints.scale.y=mPointSize;
+    mPoints.pose.orientation.w=1.0;
+    mPoints.action=MarkerMsg::ADD;
+    mPoints.color.a = 1.0;
+
+    //Configure KeyFrames
+    mCameraSize=0.04;
+    mKeyFrames.header.frame_id = MAP_FRAME_ID;
+    mKeyFrames.ns = KEYFRAMES_NAMESPACE;
+    mKeyFrames.id=1;
+    mKeyFrames.type = MarkerMsg::LINE_LIST;
+    mKeyFrames.scale.x=0.005;
+    mKeyFrames.pose.orientation.w=1.0;
+    mKeyFrames.action=MarkerMsg::ADD;
+
+    mKeyFrames.color.b=1.0f;
+    mKeyFrames.color.a = 1.0;
+
+    //Configure Covisibility Graph
+    mCovisibilityGraph.header.frame_id = MAP_FRAME_ID;
+    mCovisibilityGraph.ns = GRAPH_NAMESPACE;
+    mCovisibilityGraph.id=2;
+    mCovisibilityGraph.type = MarkerMsg::LINE_LIST;
+    mCovisibilityGraph.scale.x=0.002;
+    mCovisibilityGraph.pose.orientation.w=1.0;
+    mCovisibilityGraph.action=MarkerMsg::ADD;
+    mCovisibilityGraph.color.b=0.7f;
+    mCovisibilityGraph.color.g=0.7f;
+    mCovisibilityGraph.color.a = 0.3;
+
+    //Configure KeyFrames Spanning Tree
+    mMST.header.frame_id = MAP_FRAME_ID;
+    mMST.ns = GRAPH_NAMESPACE;
+    mMST.id=3;
+    mMST.type = MarkerMsg::LINE_LIST;
+    mMST.scale.x=0.005;
+    mMST.pose.orientation.w=1.0;
+    mMST.action=MarkerMsg::ADD;
+    mMST.color.b=0.0f;
+    mMST.color.g=1.0f;
+    mMST.color.a = 1.0;
+
+    //Configure Current Camera
+    mCurrentCamera.header.frame_id = MAP_FRAME_ID;
+    mCurrentCamera.ns = CAMERA_NAMESPACE;
+    mCurrentCamera.id=4;
+    mCurrentCamera.type = MarkerMsg::LINE_LIST;
+    mCurrentCamera.scale.x=0.01;//0.2; 0.03
+    mCurrentCamera.pose.orientation.w=1.0;
+    mCurrentCamera.action=MarkerMsg::ADD;
+    mCurrentCamera.color.g=1.0f;
+    mCurrentCamera.color.a = 1.0;
+    
+    //Configure Reference MapPoints
+    mReferencePoints.header.frame_id = MAP_FRAME_ID;
+    mReferencePoints.ns = POINTS_NAMESPACE;
+    mReferencePoints.id=6;
+    mReferencePoints.type = MarkerMsg::POINTS;
+    mReferencePoints.scale.x=mPointSize;
+    mReferencePoints.scale.y=mPointSize;
+    mReferencePoints.pose.orientation.w=1.0;
+    mReferencePoints.action=MarkerMsg::ADD;
+    mReferencePoints.color.r =1.0f;
+    mReferencePoints.color.a = 1.0;
+
+
+    m_map_publisher->publish(mPoints);
+    m_map_publisher->publish(mReferencePoints);
+    //m_map_publisher->publish(mCovisibilityGraph);
+    m_map_publisher->publish(mKeyFrames);
+    //m_map_publisher->publish(mCurrentCamera);
+
 
 }
 
@@ -102,6 +212,30 @@ void MonocularSlamNode::UpdateSLAMState()
     mbUpdated = true;
     
 }
+
+
+void MonocularSlamNode::UpdateMapState()
+{
+
+    unique_lock<mutex> lock(mMutex);
+
+    if (!Tcw.empty()){
+        mbCameraUpdated = true;
+
+    }
+
+    if (m_SLAM->IsMapOptimized())
+    {
+        mbMapUpdated = true;
+     
+        mvKeyFrames = m_SLAM->GetAllKeyFrames();
+        mvMapPoints = m_SLAM->GetAllMapPoints();
+        mvRefMapPoints = m_SLAM->GetReferenceMapPoints();
+
+    }
+
+}
+
 
 
 void MonocularSlamNode::PublishFrame()
@@ -250,5 +384,76 @@ void MonocularSlamNode::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
     im.copyTo(imText.rowRange(0,im.rows).colRange(0,im.cols));
     imText.rowRange(im.rows,imText.rows) = cv::Mat::zeros(textSize.height+10,im.cols,im.type());
     cv::putText(imText,s.str(),cv::Point(5,imText.rows-5),cv::FONT_HERSHEY_PLAIN,1,cv::Scalar(255,255,255),1,8);
+
+}
+
+
+
+void MonocularSlamNode::PublishCurrentCamera()
+{
+
+
+
+
+
+
+}
+
+
+
+void MonocularSlamNode::PublishMapPoints()
+{
+
+    mPoints.points.clear();
+    mReferencePoints.points.clear();
+
+    set<ORB_SLAM2::MapPoint*> spRefMPs(mvRefMapPoints.begin(), mvRefMapPoints.end());
+
+    if(mvMapPoints.empty())
+        return;
+
+    for(size_t i=0, iend=mvMapPoints.size(); i<iend;i++)
+    {
+        if(mvMapPoints[i]->isBad() || spRefMPs.count(mvMapPoints[i]))
+            continue;
+        PointMsg p;
+        cv::Mat pos = mvMapPoints[i]->GetWorldPos();
+        p.x=pos.at<float>(0);
+        p.y=pos.at<float>(1);
+        p.z=pos.at<float>(2);
+
+        mPoints.points.push_back(p);
+    }
+
+    for(set<ORB_SLAM2::MapPoint*>::iterator sit=spRefMPs.begin(), send=spRefMPs.end(); sit!=send; sit++)
+    {
+        if((*sit)->isBad())
+            continue;
+        PointMsg p;
+        cv::Mat pos = (*sit)->GetWorldPos();
+        p.x=pos.at<float>(0);
+        p.y=pos.at<float>(1);
+        p.z=pos.at<float>(2);
+
+        mReferencePoints.points.push_back(p);
+
+    }
+
+
+    mPoints.header.stamp = this->now();
+    mReferencePoints.header.stamp = this->now();
+    m_map_publisher->publish(mPoints);
+    m_map_publisher->publish(mReferencePoints);
+
+}
+
+
+void MonocularSlamNode::PublishKeyFrames()
+{
+
+
+
+
+
 
 }
