@@ -2,8 +2,6 @@
 
 #include<opencv2/core/core.hpp>
 
-#include"MapPoint.h"
-
 using ImageMsg = sensor_msgs::msg::Image;
 
 using namespace std;

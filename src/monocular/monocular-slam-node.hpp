@@ -1,8 +1,6 @@
+#ifndef __MONOCULAR_SLAM_NODE_HPP__
+#define __MONOCULAR_SLAM_NODE_HPP__
 
-#include<iostream>
-#include<algorithm>
-#include<fstream>
-#include<chrono>
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
@@ -38,3 +36,5 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr m_image_subscriber;
 
 };
+
+#endif

@@ -1,6 +1,7 @@
 # ros2-ORB_SLAM2
 ROS2 node wrapping the ORB_SLAM2 library
 
+If you want to integrate ORB_SLAM2 inside your ROS2 system, consider trying [this](https://github.com/alsora/ORB_SLAM2) fork of ORB_SLAM2 library which drops Pangolin dependency and streams all SLAM data through ROS2 topics.
 
 ### Requirements
 
@@ -43,7 +44,14 @@ For example you can stream frames from your laptop webcam using:
     $ ros2 run image_tools cam2image -t camera
 
 
-Similarly you can run the `rgbd` node by using 
+##### RGBD Node
+
+You can run the `rgbd` node by using 
 
     $ ros2 run orbslam rgbd PATH_TO_VOCABULARY PATH_TO_YAML_CONFIG_FILE
 
+##### Stereo Node
+
+You can run the `stereo` node by using 
+
+    $ ros2 run orbslam stereo PATH_TO_VOCABULARY PATH_TO_YAML_CONFIG_FILE BOOL_RECTIFY
