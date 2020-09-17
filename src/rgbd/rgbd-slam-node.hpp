@@ -2,7 +2,6 @@
 #ifndef __RGBD_SLAM_NODE_HPP__
 #define __RGBD_SLAM_NODE_HPP__
 
-
 #include<iostream>
 #include<algorithm>
 #include<fstream>
@@ -22,23 +21,16 @@
 #include "Map.h"
 #include "Tracking.h"
 
-
-typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Image, sensor_msgs::msg::Image> approximate_sync_policy;
-
-
 class RgbdSlamNode : public rclcpp::Node
 {
-
 public:
-
-    RgbdSlamNode(ORB_SLAM2::System* pSLAM, const string &strVocFile, const string &strSettingsFile);
-
+    RgbdSlamNode(ORB_SLAM2::System* pSLAM);
 
     ~RgbdSlamNode();
 
-
 private: 
-
+    using ImageMsg = sensor_msgs::msg::Image;
+    typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Image, sensor_msgs::msg::Image> approximate_sync_policy;
 
     void GrabRGBD(const sensor_msgs::msg::Image::SharedPtr msgRGB, const sensor_msgs::msg::Image::SharedPtr msgD);
 
@@ -52,7 +44,5 @@ private:
 
     std::shared_ptr<message_filters::Synchronizer<approximate_sync_policy> > syncApproximate;
 };
-
-
 
 #endif

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>orbslam</name>
+  <name>ros2_orbslam</name>
   <version>0.0.1</version>
-  <description>ROS2 wrapper for the ORB_SLAM2 library</description>
+  <description>ROS 2 wrapper for the ORB_SLAM2 library</description>
   <maintainer email="alberto.soragna@gmail.com">Alberto Soragna</maintainer>
   <license>MIT</license>
   <author>Alberto Soragna</author>

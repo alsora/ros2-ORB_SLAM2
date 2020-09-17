@@ -2,18 +2,12 @@
 
 #include<opencv2/core/core.hpp>
 
-
-using ImageMsg = sensor_msgs::msg::Image;
-
-using namespace std;
-
 using std::placeholders::_1;
 
-RgbdSlamNode::RgbdSlamNode(ORB_SLAM2::System* pSLAM, const string &strVocFile, const string &strSettingsFile)
-:   Node("orbslam")
-    ,m_SLAM(pSLAM)
+RgbdSlamNode::RgbdSlamNode(ORB_SLAM2::System* pSLAM)
+:   Node("orbslam"),
+    m_SLAM(pSLAM)
 {
-
     rgb_sub = std::make_shared<message_filters::Subscriber<ImageMsg> >(shared_ptr<rclcpp::Node>(this), "camera/rgb");
     depth_sub = std::make_shared<message_filters::Subscriber<ImageMsg> >(shared_ptr<rclcpp::Node>(this), "camera/depth");
 
@@ -22,7 +16,6 @@ RgbdSlamNode::RgbdSlamNode(ORB_SLAM2::System* pSLAM, const string &strVocFile, c
 
 }
 
-
 RgbdSlamNode::~RgbdSlamNode()
 {
     // Stop all threads
@@ -30,13 +23,10 @@ RgbdSlamNode::~RgbdSlamNode()
 
     // Save camera trajectory
     m_SLAM->SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
-
 }
-
 
 void RgbdSlamNode::GrabRGBD(const ImageMsg::SharedPtr msgRGB, const ImageMsg::SharedPtr msgD)
 {
-
     // Copy the ros rgb image message to cv::Mat.
     try
     {
@@ -59,7 +49,5 @@ void RgbdSlamNode::GrabRGBD(const ImageMsg::SharedPtr msgRGB, const ImageMsg::Sh
         return;
     }
     
-
     cv::Mat Tcw = m_SLAM->TrackRGBD(cv_ptrRGB->image, cv_ptrD->image, msgRGB->header.stamp.sec);
-    
 }

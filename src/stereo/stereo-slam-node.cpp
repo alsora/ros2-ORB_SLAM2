@@ -2,17 +2,12 @@
 
 #include<opencv2/core/core.hpp>
 
-
-using ImageMsg = sensor_msgs::msg::Image;
-
-using namespace std;
-
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-StereoSlamNode::StereoSlamNode(ORB_SLAM2::System* pSLAM, const string &strVocFile, const string &strSettingsFile, const string &strDoRectify)
-:   Node("orbslam")
-    ,m_SLAM(pSLAM)
+StereoSlamNode::StereoSlamNode(ORB_SLAM2::System* pSLAM, const string &strSettingsFile, const string &strDoRectify)
+:   Node("orbslam"),
+    m_SLAM(pSLAM)
 {
     stringstream ss(strDoRectify);
     ss >> boolalpha >> doRectify;
@@ -53,17 +48,12 @@ StereoSlamNode::StereoSlamNode(ORB_SLAM2::System* pSLAM, const string &strVocFil
         cv::initUndistortRectifyMap(K_r,D_r,R_r,P_r.rowRange(0,3).colRange(0,3),cv::Size(cols_r,rows_r),CV_32F,M1r,M2r);
     }
 
-
-
     left_sub = std::make_shared<message_filters::Subscriber<ImageMsg> >(shared_ptr<rclcpp::Node>(this), "camera/left");
     right_sub = std::make_shared<message_filters::Subscriber<ImageMsg> >(shared_ptr<rclcpp::Node>(this), "camera/right");
 
     syncApproximate = std::make_shared<message_filters::Synchronizer<approximate_sync_policy> >(approximate_sync_policy(10), *left_sub, *right_sub);
     syncApproximate->registerCallback(&StereoSlamNode::GrabStereo, this);
-
-
 }
-
 
 StereoSlamNode::~StereoSlamNode()
 {
@@ -72,13 +62,10 @@ StereoSlamNode::~StereoSlamNode()
 
     // Save camera trajectory
     m_SLAM->SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
-
 }
-
 
 void StereoSlamNode::GrabStereo(const ImageMsg::SharedPtr msgLeft, const ImageMsg::SharedPtr msgRight)
 {
-
     // Copy the ros rgb image message to cv::Mat.
     try
     {
@@ -116,5 +103,4 @@ void StereoSlamNode::GrabStereo(const ImageMsg::SharedPtr msgLeft, const ImageMs
         Tcw = m_SLAM->TrackRGBD(cv_ptrLeft->image, cv_ptrRight->image, msgLeft->header.stamp.sec);
     
     }
-
 }

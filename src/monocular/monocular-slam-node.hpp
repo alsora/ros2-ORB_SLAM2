@@ -15,17 +15,13 @@
 
 class MonocularSlamNode : public rclcpp::Node
 {
-
 public:
-
-    MonocularSlamNode(ORB_SLAM2::System* pSLAM, const string &strVocFile, const string &strSettingsFile);
-
+    MonocularSlamNode(ORB_SLAM2::System* pSLAM);
 
     ~MonocularSlamNode();
 
-
-private: 
-
+private:
+    using ImageMsg = sensor_msgs::msg::Image;
 
     void GrabImage(const sensor_msgs::msg::Image::SharedPtr msg);
 
@@ -34,7 +30,6 @@ private:
     cv_bridge::CvImagePtr m_cvImPtr;
 
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr m_image_subscriber;
-
 };
 
 #endif

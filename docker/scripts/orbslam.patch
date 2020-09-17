@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 08a8af4..cfa898a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -78,6 +78,8 @@ ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+ ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+ )
+ 
++install(TARGETS ${PROJECT_NAME} DESTINATION lib)
++
+ # Build examples
+ 
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/RGB-D)
+diff --git a/include/System.h b/include/System.h
+index b377b45..d1c475a 100644
+--- a/include/System.h
++++ b/include/System.h
+@@ -22,6 +22,7 @@
+ #ifndef SYSTEM_H
+ #define SYSTEM_H
+ 
++#include <unistd.h>
+ #include<string>
+ #include<thread>
+ #include<opencv2/core/core.hpp>
