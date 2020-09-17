@@ -157,17 +157,23 @@ RUN git clone -b ros2 https://github.com/ros-perception/vision_opencv.git src/vi
 
 # build the workspace
 RUN /bin/bash -c 'source $HOME/ros2_sdk/install/setup.sh; \
+  export ORB_SLAM2_ROOT_DIR=~/ORB_SLAM2; \
   colcon build'
 
 #### SET ENVIRONMENT
 
 WORKDIR $HOME
 
+# Source ROS workspaces when opening new terminal
 RUN echo ' \n\
 echo "Sourcing ROS2 packages..." \n\
 source $HOME/ros2_sdk/install/setup.sh \n\
 source $HOME/ws/install/local_setup.sh' >> $HOME/.bashrc
 
+# Set ORB_SLAM2_ROOT_DIR
+RUN echo ' \n\
+export ORB_SLAM2_ROOT_DIR=~/ORB_SLAM2' >> $HOME/.bashrc
+
 # add orbslam shared libraries to path
 RUN echo ' \n\
-export LD_LIBRARY_PATH=:~/ORB_SLAM2/Thirdparty/DBoW2/lib:~/ORB_SLAM2/Thirdparty/g2o/lib:~/ORB_SLAM2/lib:$LD_LIBRARY_PATH' >> $HOME/.bashrc
+export LD_LIBRARY_PATH=~/Pangolin/build/src/:~/ORB_SLAM2/Thirdparty/DBoW2/lib:~/ORB_SLAM2/Thirdparty/g2o/lib:~/ORB_SLAM2/lib:$LD_LIBRARY_PATH' >> $HOME/.bashrc

@@ -45,9 +45,9 @@ First source the workspace
 
     $ source ws/install/setup.sh
 
-Then add to the LD_LIBRARY_PATH the location of ORB_SLAM2 library and its dependencies
+Then add to the LD_LIBRARY_PATH the location of ORB_SLAM2 library and its dependencies (the following paths may be different on your machine)
 
-    $ export LD_LIBRARY_PATH=:~/ORB_SLAM2/Thirdparty/DBoW2/lib:~/ORB_SLAM2/Thirdparty/g2o/lib:~/ORB_SLAM2/lib:$LD_LIBRARY_PATH
+    $ export LD_LIBRARY_PATH=~/Pangolin/build/src/:~/ORB_SLAM2/Thirdparty/DBoW2/lib:~/ORB_SLAM2/Thirdparty/g2o/lib:~/ORB_SLAM2/lib:$LD_LIBRARY_PATH
 
 Run the monocular SLAM node
 
