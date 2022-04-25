@@ -100,7 +100,7 @@ void StereoSlamNode::GrabStereo(const ImageMsg::SharedPtr msgLeft, const ImageMs
     }
     else {
         
-        Tcw = m_SLAM->TrackRGBD(cv_ptrLeft->image, cv_ptrRight->image, msgLeft->header.stamp.sec);
+        Tcw = m_SLAM->TrackStereo(cv_ptrLeft->image, cv_ptrRight->image, msgLeft->header.stamp.sec);
     
     }
 }
