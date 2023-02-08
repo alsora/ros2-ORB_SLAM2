@@ -97,6 +97,16 @@ RUN rosdep init
 RUN rosdep update
 RUN rosdep install --from-paths src --ignore-src --rosdistro foxy -y --skip-keys "console_bridge fastcdr fastrtps rti-connext-dds-5.3.1 urdfdom_headers"
 
+# update cmake higher than required version
+WORKDIR $HOME
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.2/cmake-3.18.2.tar.gz
+RUN tar -xvf cmake-3.18.2.tar.gz
+WORKDIR $HOME/cmake-3.18.2
+RUN ./bootstrap
+RUN make
+RUN make install
+
+
 # build the workspace
 RUN colcon build --symlink-install
 
@@ -137,8 +147,8 @@ RUN apt-get install -y \
 WORKDIR $HOME/ORB_SLAM2
 RUN git apply $HOME/scripts/orbslam.patch
 RUN chmod +x $HOME/scripts/build.sh
-RUN /bin/bash -c 'export LD_LIBRARY_PATH=~/Pangolin/build/src/:$LD_LIBRARY_PATH; \
-  bash $HOME/scripts/build.sh'
+RUN echo 'export LD_LIBRARY_PATH=~/Pangolin/build/src/:$LD_LIBRARY_PATH; \
+      bash $HOME/scripts/build.sh' >> /bin/bash
 
 
 ##### ORBSLAM ROS2
@@ -153,12 +163,12 @@ RUN pip install numpy
 
 # get source code
 RUN git clone https://github.com/alsora/ros2-ORB_SLAM2 src/ros2-ORB_SLAM2
-RUN git clone -b ros2 https://github.com/ros-perception/vision_opencv.git src/vision_opencv
+RUN git clone -b foxy https://github.com/ros-perception/vision_opencv.git src/vision_opencv
 
 # build the workspace
-RUN /bin/bash -c 'source $HOME/ros2_sdk/install/setup.sh; \
+RUN echo 'source $HOME/ros2_sdk/install/setup.sh; \
   export ORB_SLAM2_ROOT_DIR=~/ORB_SLAM2; \
-  colcon build'
+  colcon build' >> /bin/bash
 
 #### SET ENVIRONMENT
 
